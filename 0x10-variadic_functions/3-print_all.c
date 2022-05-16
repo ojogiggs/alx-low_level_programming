@@ -1,51 +1,77 @@
 #include "variadic_functions.h"
-
 /**
- * print_all - prints anything.
- *  @format: a list of types of arguments passed to the function.
- *
- *  Return: no return.
+ * use_c - function to get c argument
+ * @arg: va_list
+ */
+void use_c(va_list arg, char *sep)
+{
+	printf("%s%c", sep, va_arg(arg, int));
+}
+/**
+ * use_i - function to get i argument
+ * @arg: va_list
+ */
+void use_i(va_list arg, char *sep)
+{
+	printf("%s%d", sep, va_arg(arg, int));
+}
+/**
+ * use_f - function to get f argument
+ * @arg: va_list
+ */
+void use_f(va_list arg, char *sep)
+{
+	printf("%s%f", sep, va_arg(arg, double));
+}
+/**
+ * use_s - function to get s argument
+ * @arg: va_list
+ */
+void use_s(va_list arg, char *sep)
+{
+	char *s;
+	s = va_arg(arg, char *);
+	if (!s)
+		s = "(nil)";
+	printf("%s%s", sep, s);
+}
+/**
+ * print_all - prints anything
+ * @format: pointer to string specifier
  */
 void print_all(const char * const format, ...)
 {
-	va_list valist;
-	unsigned int i = 0, j, c = 0;
-	char *str;
-	const char t_arg[] = "cifs";
+	/*declare variables and initialize struct array*/
+	chr_st ch[] = {
+		{"c", use_c},
+		{"i", use_i},
+		{"f", use_f},
+		{"s", use_s},
+		{NULL, NULL}
+	};
 
-	va_start(valist, format);
+	int i = 0, j = 0;
+	char *separator;
+	va_list arg;
+	/*initializing arg with format*/
+	va_start(arg, format);
+	separator = "";
+	/*looping through format and applying functions*/
 	while (format && format[i])
 	{
-		j = 0;
-		while (t_arg[j])
+		while (j < 4)/*go through the struct array 4 times*/
 		{
-			if (format[i] == t_arg[j] && c)
+			if (format[i] == *(ch[j].str))
 			{
-				printf(", ");
-				break;
-			} j++;
-		}
-		switch (format[i])
-		{
-		case 'c':
-			printf("%c", va_arg(valist, int)), c = 1;
-			break;
-		case 'i':
-			printf("%d", va_arg(valist, int)), c = 1;
-			break:
-		case 'f':
-			printf("%f", va_arg(valist, double)), c = 1;
-			break;
-		case 's':
-			str = va_arg(valist, char *), c = 1;
-			if (!str)
-			{
-				printf("(nil)");
-				break;
+				ch[j].f(arg, separator);/*using the function pointer*/
+				separator = ", ";
 			}
-			printf("%s", str);
-			break;
-		} i++;
+			j++;
+		}
+		j = 0;
+		i++;
 	}
-	printf("\n"), va_end(valist);
+	printf("\n");
+	va_end(arg);
 }
+	
